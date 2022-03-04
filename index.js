@@ -13,10 +13,13 @@ client.on("messageCreate", async (message) => {
         await delay(2000);
         message.delete();
     }
-  if(message.member.permissionsIn(message.channel).has("ADMINISTRATOR") || message.author.id == '209787432952922122'){ //Checks to make sure person initiating ban is an admin
-    if (message.content == "Can we ban this guy" && message.reference || message.content == "https://media0.giphy.com/media/R3ed6mqphgE8JW6Xs8/giphy.gif?cid=790b76111bef3c9ab82e41bfa51aed42d83c1881ace0f4bc&rid=giphy.gif&ct=g") {
-        message.channel.send("Right away sir.");
-        await delay (1000)
+  if(message.member.permissionsIn(message.channel).has("ADMINISTRATOR") || message.author.id == '209787432952922122'){ //Checks to make sure person initiating ban is an admin or me
+    if (message.content == "Can we ban this guy" && message.reference || message.content == "https://tenor.com/view/good-argument-you-are-banned-gif-24468307") {
+      await delay (1000)
+        if(message.content == "https://media0.giphy.com/media/R3ed6mqphgE8JW6Xs8/giphy.gif?cid=790b76111bef3c9ab82e41bfa51aed42d83c1881ace0f4bc&rid=giphy.gif&ct=g")
+        {
+          message.channel.send("Right away sir.");
+        }
         const msg = await message.channel.messages.fetch(message.reference.messageId);//cache the message that was replied to
         const member = msg.member//cache the author of reply message
         roleHistory = member.roles.cache; //Store target's roles
