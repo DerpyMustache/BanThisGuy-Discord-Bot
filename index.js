@@ -46,3 +46,5 @@ client.on('guildMemberAdd', (member) => {
 client.login(TOKEN)
 // Add music bot
 // add quips after ban
+// allow user to set ban gif (sending and afterwards)
+// fix re adding roles
