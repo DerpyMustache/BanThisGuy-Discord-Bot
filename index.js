@@ -11,7 +11,6 @@ let bot = {
   client
  }
 
-
 client.slashcommands = new Discord.Collection()
 client.loadSlashCommands = (bot, reload) => require("./handlers/slashcommands")(bot, reload)
 client.loadSlashCommands(bot, false)
@@ -33,45 +32,58 @@ client.on("messageCreate", async (message) => {
   if(message.member.permissionsIn(message.channel).has("KICK_MEMBERS")){ //Checks to make sure person initiating "ban" has correct perms
     if (banMessage.includes(message.content) && message.reference)
       {
-        if(preBanQuip.length != 0)
-        {
-          message.channel.send(preBanQuip[0])
-        }
         const msg = await message.channel.messages.fetch(message.reference.messageId);//cache the message that was replied to
         const member = msg.member //cache the author of reply message
-        if (!(userHistory.filter(e => e.id == member.id).length > 0)) // Check if users roles have already been logged
-        {
-          userHistory.push({
-            roles: member.roles.cache,
-            id: member.id,
-            nick: member.nickname
-            })
-        }
-        else{
-          let user = userHistory.find(e => e.id == member.id) //find the user in the history array
-          user.roles = member.roles.cache  //Updates users role and nickname in the history if they changed, else nothing happens
-          user.nick = member.nickname
-        }
-        client.users.fetch(member, false).then((user) => {
-          message.channel.createInvite()
-          .then(invite => user.send(`Think about what you said, then come back. https://discord.gg/${invite.code}`)) //Create invite code based on server, then send it
-          .catch(error => { if (error) 
-            console.log(error)
-            return message.channel.send("Failed to re-invite the user.")}); 
-            });
-        await delay(1000); //Wait to send invite before banning user
-        member.ban(member).then(console.log)//ban the user
-        .catch(error => { if (error) message.channel.send("Failed to ban the user.")});
-        message.guild.members.unban(member)// unban the user
-        if(postBanQuip.length != 0)
-        {
-          msg.reply(postBanQuip[0])
-        }
-      }
+        if(member.bannable)
+          {
+            if(preBanQuip.length != 0)
+            {
+              message.channel.send(preBanQuip[0])
+            }
+            
+            if (!(userHistory.filter(e => e.id == member.id).length > 0)) // Check if users roles have already been logged
+            {
+              userHistory.push({
+                roles: member.roles.cache,
+                id: member.id,
+                nick: member.nickname
+                })
+            }
+            else{
+              let user = userHistory.find(e => e.id == member.id) //find the user in the history array
+              user.roles = member.roles.cache  //Updates users role and nickname in the history if they changed, else nothing happens
+              user.nick = member.nickname
+            }
+            client.users.fetch(member, false).then((user) => {
+                message.channel.createInvite()
+                .then(invite => user.send(`Think about what you said, then come back. https://discord.gg/${invite.code}`)) //Create invite code based on server, then send it
+                .catch(error => { if (error) 
+                  console.log(error)
+                  return message.channel.send("Failed to re-invite the user.")}); 
+                })
+            await delay(1000); //Wait to send invite before banning user
+            member.ban(member).then(console.log) //ban the user
+            .then(message.guild.members.unban(member)) 
+            .catch(error => { 
+                  if (error) 
+                  {
+                    message.channel.send("Failed to ban the user. (Check if bot role is above other roles)")
+                  } 
+                })
+            if(postBanQuip.length != 0)
+            {
+              msg.reply(postBanQuip[0])
+            }
+          }
+          else{
+            message.channel.send("Failed to ban the user. (Check if bot role is above other roles)")
+          }
     }
+  }
 })
 
 client.on('guildMemberAdd', (member) => {
+  try{
   userHistory.forEach(element => {
     if(member.id == element.id)
     {
@@ -79,8 +91,12 @@ client.on('guildMemberAdd', (member) => {
       member.setNickname(element.nick) // re-set nickname
     }
   });
- });
-
+}
+catch(err)
+{
+  console.log(error)
+}
+});
 
 client.login(process.env.TOKEN)
 
