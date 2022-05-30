@@ -25,20 +25,6 @@ client.on("interactionCreate", (interaction) => {
       }
       slashcmd.run(client, interaction)
     }
-    /*else if(interaction.isButton())
-      {
-        if(interaction.customId == "Yes")
-          {
-            
-            banMessage.length = 1
-            preBanQuip[0] = ""
-            postBanQuip[0] = ""
-            return interaction.reply({ content: "All phrases cleared", components: [row] })
-          }
-          else{
-            return interaction.reply("Canceled command")
-          }
-      } */
 })
 
 userHistory = [] //Store target's roles and nickname
