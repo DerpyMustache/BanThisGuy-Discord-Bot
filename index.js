@@ -1,50 +1,102 @@
-const Discord = require("discord.js")
-
-const TOKEN = "OTQwMTM0MzA2Mjk3MzA3MTY3.YgC-TQ.KzGt7O05S6HVDVRrscsncBhscHo"
+const Discord = require("discord.js");
+const { resolvePartialEmoji } = require("discord.js/src/util/Util");
+let {banMessage, preBanQuip, postBanQuip, row} = require("./globals")
+require("dotenv").config()
 
 const client = new Discord.Client({ intents: [ "GUILDS",
  "GUILD_MESSAGES",
  "GUILD_MEMBERS" ] });
 
+let bot = {
+  client
+ }
+
+
+client.slashcommands = new Discord.Collection()
+client.loadSlashCommands = (bot, reload) => require("./handlers/slashcommands")(bot, reload)
+client.loadSlashCommands(bot, false)
+client.on("interactionCreate", (interaction) => {
+  if (interaction.isCommand())
+    {
+      const slashcmd = client.slashcommands.get(interaction.commandName)
+      if (slashcmd.perms && !interaction.member.permissions.has(slashcmd.perms))
+      {
+        return interaction.reply(`You do not have permission for this command. (Requires perm: ${slashcmd.perms})`)
+      }
+      slashcmd.run(client, interaction)
+    }
+    /*else if(interaction.isButton())
+      {
+        if(interaction.customId == "Yes")
+          {
+            
+            banMessage.length = 1
+            preBanQuip[0] = ""
+            postBanQuip[0] = ""
+            return interaction.reply({ content: "All phrases cleared", components: [row] })
+          }
+          else{
+            return interaction.reply("Canceled command")
+          }
+      } */
+})
+
+userHistory = [] //Store target's roles and nickname
 client.on("messageCreate", async (message) => {
   const delay = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
-    if (message.content == "https://tenor.com/view/awkward-gif-19335190" || message.content == "https://cdn.discordapp.com/attachments/891154973017116712/943654382296268850/ezgif.com-gif-maker.gif"){
-        message.reply("https://tenor.com/view/no-chungus-facepalm-stress-gif-16582514") //Chungus auto deletion
-        await delay(2000);
-        message.delete();
-    }
-  if(message.member.permissionsIn(message.channel).has("ADMINISTRATOR") || message.author.id == '209787432952922122'){ //Checks to make sure person initiating ban is an admin or me
-    if (message.content == "Can we ban this guy" && message.reference || message.content == "https://tenor.com/view/good-argument-you-are-banned-gif-24468307" || message.content == "https://media0.giphy.com/media/R3ed6mqphgE8JW6Xs8/giphy.gif?cid=790b76111bef3c9ab82e41bfa51aed42d83c1881ace0f4bc&rid=giphy.gif&ct=g" ) {
-      await delay (1000)
-        if(message.content == "https://media0.giphy.com/media/R3ed6mqphgE8JW6Xs8/giphy.gif?cid=790b76111bef3c9ab82e41bfa51aed42d83c1881ace0f4bc&rid=giphy.gif&ct=g" || message.content == "Can we ban this guy")
+  if(message.member.permissionsIn(message.channel).has("KICK_MEMBERS")){ //Checks to make sure person initiating "ban" has correct perms
+    if (banMessage.includes(message.content) && message.reference)
+      {
+        if(preBanQuip.length != 0)
         {
-          message.channel.send("Right away sir.");
+          message.channel.send(preBanQuip[0])
         }
         const msg = await message.channel.messages.fetch(message.reference.messageId);//cache the message that was replied to
-        const member = msg.member//cache the author of reply message
-        roleHistory = member.roles.cache; //Store target's roles
+        const member = msg.member //cache the author of reply message
+        if (!(userHistory.filter(e => e.id == member.id).length > 0)) // Check if users roles have already been logged
+        {
+          userHistory.push({
+            roles: member.roles.cache,
+            id: member.id,
+            nick: member.nickname
+            })
+        }
+        else{
+          let user = userHistory.find(e => e.id == member.id) //find the user in the history array
+          user.roles = member.roles.cache  //Updates users role and nickname in the history if they changed, else nothing happens
+          user.nick = member.nickname
+        }
         client.users.fetch(member, false).then((user) => {
           message.channel.createInvite()
           .then(invite => user.send(`Think about what you said, then come back. https://discord.gg/${invite.code}`)) //Create invite code based on server, then send it
-          .catch(console.error);
+          .catch(error => { if (error) 
+            console.log(error)
+            return message.channel.send("Failed to re-invite the user.")}); 
             });
         await delay(1000); //Wait to send invite before banning user
         member.ban(member).then(console.log)//ban the user
-        .catch(console.error);
+        .catch(error => { if (error) message.channel.send("Failed to ban the user.")});
         message.guild.members.unban(member)// unban the user
-        msg.reply('https://tenor.com/view/cope-cope-harder-saul-goodman3d-better-call-saul-saul-goodman-gif-24033192') // Cope
+        if(postBanQuip.length != 0)
+        {
+          msg.reply(postBanQuip[0])
         }
-       
+      }
     }
 })
 
 client.on('guildMemberAdd', (member) => {
-    member.roles.add(roleHistory); // Re add target's roles
+  userHistory.forEach(element => {
+    if(member.id == element.id)
+    {
+      member.roles.add(element.roles); // Re add target's roles
+      member.setNickname(element.nick) // re-set nickname
+    }
+  });
  });
 
 
-client.login(TOKEN)
-// Add music bot
-// add quips after ban
-// allow user to set ban gif (sending and afterwards)
-// fix re adding roles
+client.login(process.env.TOKEN)
+
+//change reinvite message
+// 1984 mode
