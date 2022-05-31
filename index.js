@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
-const { resolvePartialEmoji } = require("discord.js/src/util/Util");
-let {banMessage, preBanQuip, postBanQuip, row} = require("./globals")
+let guildData = require("./globals")
+
 require("dotenv").config()
 
 const client = new Discord.Client({ intents: [ "GUILDS",
@@ -28,6 +28,7 @@ client.on("interactionCreate", (interaction) => {
 
 userHistory = [] //Store target's roles and nickname
 client.on("messageCreate", async (message) => {
+ let {banMessage, preBanQuip, postBanQuip} = guildData.get(message.guildId)
   const delay = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
   if(message.member.permissionsIn(message.channel).has("KICK_MEMBERS")){ //Checks to make sure person initiating "ban" has correct perms
     if (banMessage.includes(message.content) && message.reference)
@@ -41,16 +42,17 @@ client.on("messageCreate", async (message) => {
               message.channel.send(preBanQuip[0])
             }
             
-            if (!(userHistory.filter(e => e.id == member.id).length > 0)) // Check if users roles have already been logged
+            if (!(userHistory.filter(e => e.id == member.id && e.guildId == member.guild.id).length > 0)) // Check if users roles have already been logged
             {
               userHistory.push({
+                guildId: member.guild.id,
                 roles: member.roles.cache,
                 id: member.id,
                 nick: member.nickname
                 })
             }
             else{
-              let user = userHistory.find(e => e.id == member.id) //find the user in the history array
+              let user = userHistory.find(e => e.id == member.id && e.guildId == member.guild.id) //find the user in the history array
               user.roles = member.roles.cache  //Updates users role and nickname in the history if they changed, else nothing happens
               user.nick = member.nickname
             }
@@ -85,11 +87,12 @@ client.on("messageCreate", async (message) => {
 client.on('guildMemberAdd', (member) => {
   try{
   userHistory.forEach(element => {
-    if(member.id == element.id)
+    if(member.id == element.id && member.guild.id == element.guildId)
     {
       member.roles.add(element.roles); // Re add target's roles
       member.setNickname(element.nick) // re-set nickname
     }
+    console.log(userHistory)
   });
 }
 catch(err)
@@ -102,3 +105,4 @@ client.login(process.env.TOKEN)
 
 //change reinvite message
 // 1984 mode
+// possible error if same person in multiple servers

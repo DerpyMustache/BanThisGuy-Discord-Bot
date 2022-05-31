@@ -1,5 +1,6 @@
-let {banMessage, preBanQuip, postBanQuip} = require("../globals")
-const run = async (client, interaction) => {
+let guildData = require("../globals")
+const run = (client, interaction) => {
+    let {banMessage, preBanQuip, postBanQuip} = guildData.get(interaction.guildId)
     if(interaction.options.getSubcommand() == "banmessage")
     {
         try{

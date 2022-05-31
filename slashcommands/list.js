@@ -1,5 +1,6 @@
-let {banMessage, preBanQuip, postBanQuip} = require("../globals")
+let guildData = require("../globals")
 const run = (client, interaction) => {
+let {banMessage, preBanQuip, postBanQuip} = guildData.get(interaction.guildId)
         try{
             let allPhrases = "The ban phrases are: "
             banMessage.forEach(element => {

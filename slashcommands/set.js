@@ -1,6 +1,7 @@
-let {banMessage, preBanQuip, postBanQuip} = require("../globals")
+let guildData = require("../globals")
 const run = (client, interaction) => {
-    if(interaction.options.getSubcommand() == "banmessage")
+let {banMessage, preBanQuip, postBanQuip} = guildData.get(interaction.guildId)
+   if(interaction.options.getSubcommand() == "banmessage")
     {
         try{
             if(banMessage.includes(interaction.options.getString("message")))
