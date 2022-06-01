@@ -92,7 +92,6 @@ client.on('guildMemberAdd', (member) => {
       member.roles.add(element.roles); // Re add target's roles
       member.setNickname(element.nick) // re-set nickname
     }
-    console.log(userHistory)
   });
 }
 catch(err)
@@ -105,4 +104,3 @@ client.login(process.env.TOKEN)
 
 //change reinvite message
 // 1984 mode
-// possible error if same person in multiple servers
