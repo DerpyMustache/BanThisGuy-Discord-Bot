@@ -1,12 +1,10 @@
+const mongoUtil = require( './mongoUtil' );
 const Discord = require("discord.js");
-let guildData = require("./globals")
-
 require("dotenv").config()
-
+require("./database.js")
 const client = new Discord.Client({ intents: [ "GUILDS",
  "GUILD_MESSAGES",
  "GUILD_MEMBERS" ] });
-
 let bot = {
   client
  }
@@ -14,6 +12,15 @@ let bot = {
 client.slashcommands = new Discord.Collection()
 client.loadSlashCommands = (bot, reload) => require("./handlers/slashcommands")(bot, reload)
 client.loadSlashCommands(bot, false)
+
+
+
+mongoUtil.connectToServer( function( err, client ) {
+  if (err) console.log(err);
+} );
+
+
+
 client.on("interactionCreate", (interaction) => {
   if (interaction.isCommand())
     {
@@ -28,7 +35,8 @@ client.on("interactionCreate", (interaction) => {
 
 userHistory = [] //Store target's roles and nickname
 client.on("messageCreate", async (message) => {
- let {banMessage, preBanQuip, postBanQuip} = guildData.get(message.guildId)
+  const db = await mongoUtil.getDb();
+  let {banMessage, preBanQuip, postBanQuip} = await db.collection("phrasedata").findOne({ _id: message.guild.id})
   const delay = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
   if(message.member.permissionsIn(message.channel).has("KICK_MEMBERS")){ //Checks to make sure person initiating "ban" has correct perms
     if (banMessage.includes(message.content) && message.reference)

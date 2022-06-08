@@ -1,15 +1,19 @@
-let guildData = require("../globals")
-const run = (client, interaction) => {
-    let {banMessage, preBanQuip, postBanQuip} = guildData.get(interaction.guildId)
-    if(interaction.options.getSubcommand() == "banmessage")
+const mongoUtil = require( '../mongoUtil' );
+const run = async (client, interaction) => {
+  const db = mongoUtil.getDb();
+  const phrasedata = await db.collection("phrasedata").findOne({ _id: interaction.guildId})
+  let {banMessage, preBanQuip, postBanQuip} = phrasedata
+  if(interaction.options.getSubcommand() == "banmessage")
     {
         try{
             if(banMessage.includes(interaction.options.getString("message")))
             {
                 let removed = banMessage.splice(banMessage.indexOf(interaction.options.getString("message")),1)
-                return interaction.reply(`Removed ${removed}`)
+                interaction.reply(`Removed ${removed}`)
             }
-            return interaction.reply("Phrase does not exist in the list.")
+            else{
+            interaction.reply("Phrase does not exist in the list.")
+            }
         }
         catch(err){
             if(err){
@@ -22,7 +26,7 @@ const run = (client, interaction) => {
     {
         try{
             preBanQuip.length = 0
-            return interaction.reply("Pre ban quip has been cleared")
+            interaction.reply("Pre ban quip has been cleared")
         }
         catch(err){
             if(err){
@@ -35,7 +39,7 @@ const run = (client, interaction) => {
     {
         try{
             postBanQuip.length = 0
-            return interaction.reply("Post ban quip has been cleared")
+            interaction.reply("Post ban quip has been cleared")
         }
         catch(err){
             if(err){
@@ -49,7 +53,7 @@ const run = (client, interaction) => {
         try{
              if(interaction.options.getString("confirmation") == "CONFIRM")
                {
-                banMessage.length = 1
+                banMessage.length = 0
                 preBanQuip.length = 0
                 postBanQuip.length = 0
                 interaction.reply("All phrases have been cleared")
@@ -65,6 +69,13 @@ const run = (client, interaction) => {
             }
         }
     }
+    db.collection("phrasedata").updateOne({ _id: interaction.guildId },
+        { $set: {
+            banMessage: banMessage,
+            preBanQuip: preBanQuip,
+           postBanQuip: postBanQuip
+                }
+         });
 }
 
 
@@ -83,6 +94,7 @@ module.exports = {
                 type: "STRING",
                 description: "The desired phrase",
                 required: true,
+                autocomplete: true
             }
 
             ]

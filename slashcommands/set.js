@@ -1,6 +1,8 @@
-let guildData = require("../globals")
-const run = (client, interaction) => {
-let {banMessage, preBanQuip, postBanQuip} = guildData.get(interaction.guildId)
+const mongoUtil = require( '../mongoUtil' );
+const run = async (client, interaction) => {
+    const db = mongoUtil.getDb();
+    const phrasedata = await db.collection("phrasedata").findOne({ _id: interaction.guildId})
+    let {banMessage, preBanQuip, postBanQuip} = phrasedata
    if(interaction.options.getSubcommand() == "banmessage")
     {
         try{
@@ -9,7 +11,7 @@ let {banMessage, preBanQuip, postBanQuip} = guildData.get(interaction.guildId)
                    return interaction.reply("Phrase already exists.")
                 }
             banMessage.push(interaction.options.getString("message"))
-            return interaction.reply(`Ban message has been set to ${banMessage[banMessage.length-1]}`)
+            interaction.reply(`Ban message has been set to ${banMessage[banMessage.length-1]}`)
         }
         catch(err){
             if(err){
@@ -22,7 +24,7 @@ let {banMessage, preBanQuip, postBanQuip} = guildData.get(interaction.guildId)
     {
         try{
             preBanQuip[0] = interaction.options.getString("message")
-            return interaction.reply(`Pre ban quip has been set to ${preBanQuip[0]}`)
+            interaction.reply(`Pre ban quip has been set to ${preBanQuip[0]}`)
         }
         catch(err){
             if(err){
@@ -34,7 +36,7 @@ let {banMessage, preBanQuip, postBanQuip} = guildData.get(interaction.guildId)
     else{
         try{
             postBanQuip[0] = interaction.options.getString("message")
-            return interaction.reply(`Post ban quip has been set to ${postBanQuip}`)
+            interaction.reply(`Post ban quip has been set to ${postBanQuip}`)
         }
         catch(err){
             if(err){
@@ -43,6 +45,13 @@ let {banMessage, preBanQuip, postBanQuip} = guildData.get(interaction.guildId)
             }
         }
     }
+    db.collection("phrasedata").updateOne({ _id: interaction.guildId },
+         { $set: {
+             banMessage: banMessage,
+             preBanQuip: preBanQuip,
+            postBanQuip: postBanQuip
+                 }
+          });
 }
 
 
