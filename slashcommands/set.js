@@ -11,7 +11,7 @@ const run = async (client, interaction) => {
                    return interaction.reply("Phrase already exists.")
                 }
             banMessage.push(interaction.options.getString("message"))
-            interaction.reply(`Ban message has been set to ${banMessage[banMessage.length-1]}`)
+            interaction.reply(`${banMessage[banMessage.length-1]} has been added to the list of ban phrases.`)
         }
         catch(err){
             if(err){
