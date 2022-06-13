@@ -1,5 +1,6 @@
 const mongoUtil = require( './mongoUtil' );
 const Discord = require("discord.js");
+const { AutoPoster } = require('topgg-autoposter')
 require("dotenv").config()
 require("./database.js")
 const client = new Discord.Client({ intents: [ "GUILDS",
@@ -8,7 +9,16 @@ const client = new Discord.Client({ intents: [ "GUILDS",
 let bot = {
   client
  }
+ 
+ client.on("ready", () => {
 
+  const ap = AutoPoster(process.env.GG, client)
+
+  ap.on('posted', () => {
+    console.log('Posted stats to Top.gg!')
+  })
+
+})
 client.slashcommands = new Discord.Collection()
 client.loadSlashCommands = (bot, reload) => require("./handlers/slashcommands")(bot, reload)
 client.loadSlashCommands(bot, false)
@@ -25,7 +35,7 @@ client.on("interactionCreate", (interaction) => {
   if (interaction.isCommand())
     {
       const slashcmd = client.slashcommands.get(interaction.commandName)
-      if (slashcmd.perms && !interaction.member.permissions.has(slashcmd.perms))
+      if (slashcmd.perms && (!interaction.member.permissions.has(slashcmd.perms[0]) && !interaction.member.permissions.has(slashcmd.perms[1])) )
       {
         return interaction.reply(`You do not have permission for this command. (Requires perm: ${slashcmd.perms})`)
       }
@@ -38,7 +48,7 @@ client.on("messageCreate", async (message) => {
   const db = await mongoUtil.getDb();
   let {banMessage, preBanQuip, postBanQuip} = await db.collection("phrasedata").findOne({ _id: message.guild.id})
   const delay = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
-  if(message.member.permissionsIn(message.channel).has("KICK_MEMBERS")){ //Checks to make sure person initiating "ban" has correct perms
+  if(message.member.permissionsIn(message.channel).has("KICK_MEMBERS") || message.member.permissionsIn(message.channel).has("BAN_MEMBERS") ){ //Checks to make sure person initiating "ban" has correct perms
     if (banMessage.includes(message.content) && message.reference)
       {
         const msg = await message.channel.messages.fetch(message.reference.messageId);//cache the message that was replied to

@@ -58,7 +58,7 @@ const run = async (client, interaction) => {
 module.exports = {
     name: "set",
     description: "Cutstomize various aspects of the bot",
-    perms: "KICK_MEMBERS",
+    perms: ["KICK_MEMBERS","BAN_MEMBERS"],
     options: [
         {
             type: "SUB_COMMAND",

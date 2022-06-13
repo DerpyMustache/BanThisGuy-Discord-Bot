@@ -82,7 +82,7 @@ const run = async (client, interaction) => {
 module.exports = {
     name: "clear",
     description: "Remove some or all of the bots saved phrases",
-    perms: "KICK_MEMBERS",
+    perms: ["KICK_MEMBERS","BAN_MEMBERS"],
     options: [
         {
             type: "SUB_COMMAND",
