@@ -45,7 +45,7 @@ client.on("interactionCreate", (interaction) => {
 
 userHistory = [] //Store target's roles and nickname
 client.on("messageCreate", async (message) => {
-  if (!(message.member))
+  if (message.member == null)
   {
     return
   }
