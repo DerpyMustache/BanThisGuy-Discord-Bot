@@ -45,6 +45,10 @@ client.on("interactionCreate", (interaction) => {
 
 userHistory = [] //Store target's roles and nickname
 client.on("messageCreate", async (message) => {
+  if (message.system)
+  {
+    return
+  }
   const db = await mongoUtil.getDb();
   let {banMessage, preBanQuip, postBanQuip} = await db.collection("phrasedata").findOne({ _id: message.guild.id})
   const delay = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
