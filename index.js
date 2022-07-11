@@ -80,13 +80,14 @@ client.on("messageCreate", async (message) => {
             }
             client.users.fetch(member, false).then((user) => {
                 message.channel.createInvite()
-                .then(invite => user.send(`Think about what you said, then come back. https://discord.gg/${invite.code}`)) //Create invite code based on server, then send it
-                .catch(error => { if (error) 
-                  console.log(error)
-                  return message.channel.send("Failed to re-invite the user.")}); 
+                .then(invite => user.send(`Think about what you said, then come back. https://discord.gg/${invite.code}`)
+                .catch(error =>   {if (error) 
+                   console.log(error)
+                    return message.channel.send("Unable to message user. (User may have dm privacy settings preventing this)") })) //Create invite code based on server, then send it
+               
                 })
             await delay(1000); //Wait to send invite before banning user
-            member.ban(member).then(console.log) //ban the user
+            member.ban(member).then(console.log(`Guild: ${member.guild.name}\n User: ${member.user.username}`)) //ban the user
             .then(message.guild.members.unban(member)) 
             .catch(error => { 
                   if (error) 
@@ -106,7 +107,9 @@ client.on("messageCreate", async (message) => {
   }
 })
 
-client.on('guildMemberAdd', (member) => {
+client.on('guildMemberAdd', async (member) => {
+  const delay = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
+  await delay(2000);
   try{
   userHistory.forEach(element => {
     if(member.id == element.id && member.guild.id == element.guildId)
