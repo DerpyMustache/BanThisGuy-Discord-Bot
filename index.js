@@ -56,6 +56,8 @@ client.on("messageCreate", async (message) => {
     if(!banMessage)
     {
       return message.channel.send("Failed to retrieve data from database. Try again shortly.")
+      .catch(error => message.member.send("I don't have permission to send messages in the channel you used me in!"))
+      .catch(error => console.log(error))
     }
     const delay = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
     if(message.member.permissionsIn(message.channel).has("KICK_MEMBERS") || message.member.permissionsIn(message.channel).has("BAN_MEMBERS") ){ //Checks to make sure person initiating "ban" has correct perms
@@ -84,23 +86,24 @@ client.on("messageCreate", async (message) => {
                 user.roles = member.roles.cache  //Updates users role and nickname in the history if they changed, else nothing happens
                 user.nick = member.nickname
               }
+              let invited = true;
               client.users.fetch(member, false).then((user) => {
-                  message.channel.createInvite()
-                  .then(invite => user.send(`Think about what you said, then come back. https://discord.gg/${invite.code}`)
-                  .catch(error =>   {if (error) 
-                    console.log(error)
-                      return message.channel.send("Unable to message user. (User may have dm privacy settings preventing this)") })) //Create invite code based on server, then send it
-                
+                  message.channel.createInvite({maxUses: 1, unique: true})
+                  .then(invite => user.send(`Think about what you said, then come back. ${invite}`)) //Create invite code based on server, then send it
+                  .catch(error => {
+                    invited = false;
+                    message.channel.send("Unable to message user to re-invite. Ban process cancelled. (User may have dm privacy settings preventing this or bot cannot create invites)")
                   })
-              await delay(1000); //Wait to send invite before banning user
-              member.ban(member).then(console.log(`Guild: ${member.guild.name}\n User: ${member.user.username}`)) //ban the user
-              .then(message.guild.members.unban(member)) 
-              .catch(error => { 
-                    if (error) 
-                    {
-                      message.channel.send("Failed to ban the user. (Check if bot role is above other roles)")
-                    } 
+                  .catch(error => message.member.send("I don't have permission to send messages in the channel you used me in!"))
+                  .catch(error => console.log(error))
                   })
+              await delay(1000)
+              if(invited)
+              {
+              member.ban(member)
+              .then(console.log(`Guild: ${member.guild.name}\n User: ${member.user.username}`)) //ban the user
+              .then(message.guild.members.unban(member))
+              }
               if(postBanQuip.length != 0)
               {
                 msg.reply(postBanQuip[0])
@@ -108,8 +111,10 @@ client.on("messageCreate", async (message) => {
             }
             else{
               message.channel.send("Failed to ban the user. (Check if bot role is above other roles)")
+              .catch(error => message.member.send("I don't have permission to send messages in the channel you used me in!"))
+              .catch(error => console.log(error))
             }
-      }
+          }
     }
   }
 })
