@@ -10,11 +10,11 @@ const run = async (client, interaction) => {
    if(interaction.options.getSubcommand() == "banmessage")
     {
         try{
-            if(banMessage.includes(interaction.options.getString("message")))
+            if(banMessage.includes(interaction.options.getString("message").toLowerCase()))
                 {
                    return interaction.reply("Phrase already exists.")
                 }
-            banMessage.push(interaction.options.getString("message"))
+            banMessage.push(interaction.options.getString("message").toLowerCase())
             interaction.reply(`${banMessage[banMessage.length-1]} has been added to the list of ban phrases.`)
         }
         catch(err){

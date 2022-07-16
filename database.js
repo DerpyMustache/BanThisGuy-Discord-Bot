@@ -15,7 +15,7 @@ client.on("ready", async () =>  {
             db.collection("phrasedata").insertOne(
                 {
                     _id: guild.id,
-                    banMessage:["Can we ban this guy"],
+                    banMessage:["can we ban this guy"],
                     preBanQuip: [],
                     postBanQuip: [],
                 }
@@ -34,7 +34,7 @@ client.on("guildCreate", async guild => {
             db.collection("phrasedata").insertOne(
                 {
                     _id: id,
-                    banMessage:["Can we ban this guy"],
+                    banMessage:["can we ban this guy"],
                     preBanQuip: [],
                     postBanQuip: [],
                 }

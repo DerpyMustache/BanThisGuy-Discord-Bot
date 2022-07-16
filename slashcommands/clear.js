@@ -10,9 +10,9 @@ const run = async (client, interaction) => {
   if(interaction.options.getSubcommand() == "banmessage")
     {
         try{
-            if(banMessage.includes(interaction.options.getString("message")))
+            if(banMessage.includes(interaction.options.getString("message").toLowerCase()))
             {
-                let removed = banMessage.splice(banMessage.indexOf(interaction.options.getString("message")),1)
+                let removed = banMessage.splice(banMessage.indexOf(interaction.options.getString("message").toLowerCase()),1)
                 interaction.reply(`Removed ${removed}`)
             }
             else{

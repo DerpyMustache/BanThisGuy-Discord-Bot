@@ -60,11 +60,14 @@ client.on("messageCreate", async (message) => {
       .catch(error => console.log(error))
     }
     const delay = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
-    if(message.member.permissionsIn(message.channel).has("KICK_MEMBERS") || message.member.permissionsIn(message.channel).has("BAN_MEMBERS") ){ //Checks to make sure person initiating "ban" has correct perms
-      if (banMessage.includes(message.content))
+    if (banMessage.includes(message.content.toLowerCase()))
+    {
+      if(message.member.permissionsIn(message.channel).has("KICK_MEMBERS") || message.member.permissionsIn(message.channel).has("BAN_MEMBERS") ) //Checks to make sure person initiating "ban" has correct perms
+      { 
         {
           const msg = await message.channel.messages.fetch(message.reference.messageId);//cache the message that was replied to
-          const member = msg.member //cache the author of reply message
+          const member = await message.guild.members.fetch(msg.member) 
+        
           if(member.bannable)
             {
               if(preBanQuip.length != 0)
@@ -116,25 +119,25 @@ client.on("messageCreate", async (message) => {
             }
           }
     }
+      else{
+      message.channel.send("You don't have permission to do that! (Requires kick or ban permissions)")
+      .catch(error => message.member.send("I don't have permission to send messages in the channel you used me in!"))
+              .catch(error => console.log(error))
+      }
+  }
   }
 })
 
 client.on('guildMemberAdd', async (member) => {
   const delay = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
   await delay(2000);
-  try{
   userHistory.forEach(element => {
     if(member.id == element.id && member.guild.id == element.guildId)
     {
-      member.roles.add(element.roles); // Re add target's roles
+      member.roles.add(element.roles).catch(error => console.log(member.guild.me.permissions.has("MANAGE_ROLES"))); // Re add target's roles
       member.setNickname(element.nick) // re-set nickname
     }
   });
-}
-catch(err)
-{
-  console.log(error)
-}
 });
 
 client.login(process.env.TOKEN)
