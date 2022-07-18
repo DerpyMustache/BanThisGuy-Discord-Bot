@@ -52,7 +52,7 @@ client.on("messageCreate", async (message) => {
   if(message.reference)
   {
     const db = await mongoUtil.getDb();
-    let {banMessage, preBanQuip, postBanQuip} = await db.collection("phrasedata").findOne({ _id: message.guild.id}) || {}
+    let {banMessage, preBanQuip, postBanQuip, inviteMessage} = await db.collection("phrasedata").findOne({ _id: message.guild.id}) || {}
     if(!banMessage)
     {
       return message.channel.send("Failed to retrieve data from database. Try again shortly.")
@@ -92,7 +92,7 @@ client.on("messageCreate", async (message) => {
               let invited = true;
               client.users.fetch(member, false).then((user) => {
                   message.channel.createInvite({maxUses: 1, unique: true})
-                  .then(invite => user.send(`Think about what you said, then come back. ${invite}`)) //Create invite code based on server, then send it
+                  .then(invite => user.send(`${inviteMessage} ${invite}`)) //Create invite code based on server, then send it
                   .catch(error => {
                     invited = false;
                     message.channel.send("Unable to message user to re-invite. Ban process cancelled. (User may have dm privacy settings preventing this or bot cannot create invites)")

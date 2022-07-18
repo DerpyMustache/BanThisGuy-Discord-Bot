@@ -2,7 +2,7 @@ const mongoUtil = require( '../mongoUtil' );
 const run = async (client, interaction) => {
   const db = mongoUtil.getDb();
   const phrasedata = await db.collection("phrasedata").findOne({ _id: interaction.guildId})
-  let {banMessage, preBanQuip, postBanQuip} = phrasedata || {}
+  let {banMessage, preBanQuip, postBanQuip, inviteMessage} = phrasedata || {}
   if(!banMessage)
   {
     return interaction.reply("Failed to retrieve data from database. Try again shortly.")
@@ -52,6 +52,17 @@ const run = async (client, interaction) => {
             }
         }
     }
+    else if(interaction.options.getSubcommand() == "invitemessage")
+    {
+        try{
+            inviteMessage.length = 0
+            interaction.reply("Invite message has been cleared")
+        }
+        catch(err){
+            console.log(err)
+            interaction.reply("Failed to clear message")
+        }
+    }
     else
     {
         try{
@@ -60,6 +71,7 @@ const run = async (client, interaction) => {
                 banMessage.length = 0
                 preBanQuip.length = 0
                 postBanQuip.length = 0
+                inviteMessage.length = 0
                 interaction.reply("All phrases have been cleared")
               }
               else{
@@ -77,7 +89,8 @@ const run = async (client, interaction) => {
         { $set: {
             banMessage: banMessage,
             preBanQuip: preBanQuip,
-           postBanQuip: postBanQuip
+           postBanQuip: postBanQuip,
+           inviteMessage: inviteMessage
                 }
          });
 }
@@ -112,6 +125,11 @@ module.exports = {
             type: "SUB_COMMAND",
             name: "postbanquip",
             description: "Clear the phrase the bot sends in response to the user being banned (Default is none)",
+        },
+        {
+            type: "SUB_COMMAND",
+            name: "invitemessage",
+            description: "Clear the message the bot sends when re-inviting someone (Default is none)",
         },
         {
             type: "SUB_COMMAND",

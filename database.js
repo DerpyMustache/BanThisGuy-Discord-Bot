@@ -18,6 +18,7 @@ client.on("ready", async () =>  {
                     banMessage:["can we ban this guy"],
                     preBanQuip: [],
                     postBanQuip: [],
+                    inviteMessage: []
                 }
             );
         }
@@ -37,6 +38,7 @@ client.on("guildCreate", async guild => {
                     banMessage:["can we ban this guy"],
                     preBanQuip: [],
                     postBanQuip: [],
+                    inviteMessage: []
                 }
             );
         }

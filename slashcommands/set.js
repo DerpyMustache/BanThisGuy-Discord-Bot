@@ -2,7 +2,7 @@ const mongoUtil = require( '../mongoUtil' );
 const run = async (client, interaction) => {
     const db = mongoUtil.getDb();
     const phrasedata = await db.collection("phrasedata").findOne({ _id: interaction.guildId})
-    let {banMessage, preBanQuip, postBanQuip} = phrasedata || {}
+    let {banMessage, preBanQuip, postBanQuip, inviteMessage} = phrasedata || {}
     if(!banMessage)
     {
       return interaction.reply("Failed to retrieve data from database. Try again shortly.")
@@ -37,6 +37,17 @@ const run = async (client, interaction) => {
             }
         }
     }
+    else if(interaction.options.getSubcommand() == "invitemessage")
+    {
+        try{
+            inviteMessage[0] = interaction.options.getString("message")
+            interaction.reply(`Invite message has been set to ${inviteMessage}`)
+        }
+        catch(err){
+            console.log(err)
+            interaction.reply("Failed to set message")
+        }
+    }
     else{
         try{
             postBanQuip[0] = interaction.options.getString("message")
@@ -53,7 +64,8 @@ const run = async (client, interaction) => {
          { $set: {
              banMessage: banMessage,
              preBanQuip: preBanQuip,
-            postBanQuip: postBanQuip
+            postBanQuip: postBanQuip,
+            inviteMessage: inviteMessage
                  }
           });
 }
@@ -96,6 +108,20 @@ module.exports = {
             type: "SUB_COMMAND",
             name: "postbanquip",
             description: "Change the phrase the bot sends in response to the user being banned (Can have one)",
+            options: [ 
+            {
+                name: "message",
+                type: "STRING",
+                description: "The desired phrase",
+                required: true
+            }
+
+            ]
+        },
+        {
+            type: "SUB_COMMAND",
+            name: "invitemessage",
+            description: "Change the phrase the bot sends when re-inviting someone (Can have one)",
             options: [ 
             {
                 name: "message",

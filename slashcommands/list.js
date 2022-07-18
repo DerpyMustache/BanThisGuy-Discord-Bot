@@ -2,7 +2,7 @@ const mongoUtil = require( '../mongoUtil' );
 const run = async (client, interaction) => {
     const db = mongoUtil.getDb();
     const phrasedata = await db.collection("phrasedata").findOne({ _id: interaction.guildId})
-    let {banMessage, preBanQuip, postBanQuip} = phrasedata || {}
+    let {banMessage, preBanQuip, postBanQuip, inviteMessage} = phrasedata || {}
     if(!banMessage)
     {
       return interaction.reply("Failed to retrieve data from database. Try again shortly.")
@@ -14,6 +14,7 @@ const run = async (client, interaction) => {
             });
             allPhrases += `\nThe pre ban quip is ${preBanQuip}`
             allPhrases += `\nThe post ban quip is ${postBanQuip}`
+            allPhrases += `\nThe invite message is ${inviteMessage}`
             return interaction.reply(allPhrases)
         }
         catch(err){
