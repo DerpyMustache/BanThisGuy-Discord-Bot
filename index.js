@@ -59,6 +59,10 @@ client.on("messageCreate", async (message) => {
       .catch(error => message.member.send("I don't have permission to send messages in the channel you used me in!"))
       .catch(error => console.log(error))
     }
+    for(let i=0;i<banMessage.length;i++)
+    {
+      banMessage[i] = banMessage[i].toLowerCase()
+    }
     const delay = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
     if (banMessage.includes(message.content.toLowerCase()))
     {
